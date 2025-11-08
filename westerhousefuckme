@@ -1,0 +1,588 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace PlantLibraryApp
+{
+    // Our library is about plants and what you need to know about them to start your garden
+	// The information for the plant is stores by common name,latin name, light needs, water schedule && care tips
+    public class Plant
+    {
+        public string CommonName { get; set; }
+        public string LatinName { get; set; }
+        public string LightNeeds { get; set; }
+        public string WaterSchedule { get; set; }
+        public List<string> CareTips { get; } = new List<string>();
+		
+		// This method formats the Plant object into a readable string & overrides ToString(), it would print the class name instead of actual data.
+        public override string ToString()
+        {
+
+			
+            // Plant Summary
+			// If the plant does't have care tips, show "None".
+            var tips = CareTips.Count == 0 ? "None" : string.Join("; ", CareTips);
+			
+			// The newline character \n moves each field onto its own line. Multi line strong to show all the plants info
+            return $"Common: {CommonName}\n" +
+                   $"Latin: {LatinName}\n" +
+                   $"Light: {LightNeeds}\n" +
+                   $"Water: {WaterSchedule}\n" +
+                   $"Care Tips: {tips}";
+        }
+    }
+
+    class Program
+    {
+
+		// Our Plant Dictionary:
+  	 	// Key   = plant's common name 
+	    // Value = custom class containing Latin name, care tips, water schedule, etc.
+  		// StringComparer.OrdinalIgnoreCase allows case-insensitive lookups
+        private static Dictionary<string, Plant> _plants = new Dictionary<string, Plant>(StringComparer.OrdinalIgnoreCase);
+
+        static void Main()
+        {
+			
+			// Ensures special symbols like bullet points, en-dashes, and plant emojis are displayed correctly
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+			
+			// When it starts it shows our header
+            ShowHeader();
+			
+			//This controls the main loop
+			// While 'keepRunning' is true, the menu keeps showing.
+            bool keepRunning = true;
+			
+			//The main loop, the menu keeps going while "keep running" is true.
+            while (keepRunning)
+            {
+				// displays the list
+                PrintMenu();
+                Console.Write("\nChoose an option (a-f) or q to quit: ");
+				
+				//this takes in the users input, voids white space and case sensitivity
+                var choice = Console.ReadLine()?.Trim().ToLowerInvariant();
+				
+			
+				//the switch statement, it will respond to the users input
+                switch (choice)
+                {
+                    case "a":
+                        // a. Populate the Dictionary
+                        PopulateLibrary();
+                        break;
+
+                    case "b":
+                        // b. Displays the plants depending of which way you want them shown, three choises given
+                        DisplayLibraryMenu();
+                        break;
+
+                    case "c":
+                        // c. Remove a plant
+                        RemovePlantByKey();
+                        break;
+
+                    case "d":
+                        // d. Add a new plant and it's information
+                        AddNewPlant();
+                        break;
+
+                    case "e":
+                        // e. Add a more information into an existing plant
+                        AppendValueToExistingKey();
+                        break;
+
+                    case "f":
+                        // f. Sort the plants alphbetically
+						
+                        SortAndDisplayKeys();
+                        break;
+
+                    case "q": 
+						// Exit the loop
+                        keepRunning = false;
+                        break;
+
+                    default:
+						//this message appears if you user has entered invalid data
+                        Console.WriteLine("Invalid choice. Please pick a, b, c, d, e, f, or q.");
+                        break;
+                }
+
+                if (keepRunning)
+                {
+                    //Shown after each task to give them the option to return back to the main menu
+					Console.WriteLine("\nPress ENTER to return to the main menu...");
+                    Console.ReadLine();
+                }
+            }
+
+            //If you user selects Q this message appears
+			Console.WriteLine("Goodbye!");
+        }
+
+        //This message appears when application starts
+		private static void ShowHeader()
+        {
+          
+            Console.WriteLine("      🌿  A Plant Dictionary 🌿       ");
+			Console.WriteLine();
+            Console.WriteLine("        🌿  For Beginners 🌿     ");
+			Console.WriteLine();
+			Console.WriteLine();
+           
+        }
+
+        private static void PrintMenu()
+        {
+            // Main menu each task A through F represents one of the tasks given to us for homework
+			// Each task is given a letter to input instead of having to type out long names
+			
+			Console.WriteLine("TASKS:");
+			Console.WriteLine();
+            Console.WriteLine("a) Populate the dictionary with sample plants");
+            Console.WriteLine("b) Display dictionary contents (choose enumeration method)");
+            Console.WriteLine("c) Remove a plant (by key / common name)");
+            Console.WriteLine("d) Add a new plant (new key + value)");
+            Console.WriteLine("e) Add a value to an existing plant (append a Care Tip)");
+            Console.WriteLine("f) Sort and display keys");
+            Console.WriteLine("q) Quit");
+        }
+
+      
+        // a) Populate the Dictionary
+		// This method fills the dictionary with a predefined collection of Plant objects.
+		// The plant list is created with List<Plant> and is loops to ass the data in a clean way
+		// "seed" is used as the variable to define the characteristics of the plant
+       
+        private static void PopulateLibrary()
+        {
+
+            var seed = new List<Plant>
+            {
+                new Plant {
+                    CommonName = "Snake Plant",
+                    LatinName = "Dracaena trifasciata",
+                    LightNeeds = "Low–Bright Indirect",
+                    WaterSchedule = "Every 2–3 weeks; let soil dry completely",
+                    CareTips = { "Tolerates neglect", "Avoid overwatering" }
+                },
+                new Plant {
+                    CommonName = "Pothos",
+                    LatinName = "Epipremnum aureum",
+                    LightNeeds = "Low–Medium Indirect",
+                    WaterSchedule = "Every 1–2 weeks; allow top 1–2\" to dry",
+                    CareTips = { "Great beginner plant", "Vines can be trained" }
+                },
+                new Plant {
+                    CommonName = "Monstera",
+                    LatinName = "Monstera deliciosa",
+                    LightNeeds = "Bright Indirect",
+                    WaterSchedule = "Every 1–2 weeks; keep slightly moist",
+                    CareTips = { "Rotate for even fenestration", "Provide a moss pole" }
+                },
+                new Plant {
+                    CommonName = "ZZ Plant",
+                    LatinName = "Zamioculcas zamiifolia",
+                    LightNeeds = "Low–Medium Indirect",
+                    WaterSchedule = "Every 2–3 weeks; let soil dry between waterings",
+                    CareTips = { "Very drought tolerant", "Toxic if ingested" }
+                },
+                new Plant {
+                    CommonName = "Spider Plant",
+                    LatinName = "Chlorophytum comosum",
+                    LightNeeds = "Bright Indirect",
+                    WaterSchedule = "Every 1–1.5 weeks; keep slightly moist",
+                    CareTips = { "Produces baby plantlets", "Trim brown tips" }
+                },
+                new Plant {
+                    CommonName = "Peace Lily",
+                    LatinName = "Spathiphyllum wallisii",
+                    LightNeeds = "Low–Medium Indirect",
+                    WaterSchedule = "Weekly; do not let fully dry",
+                    CareTips = { "Wilts as a thirst signal", "Prefers higher humidity" }
+                },
+                new Plant {
+                    CommonName = "Aloe Vera",
+                    LatinName = "Aloe barbadensis miller",
+                    LightNeeds = "Bright Direct–Indirect",
+                    WaterSchedule = "Every 2–4 weeks; dry completely between waterings",
+                    CareTips = { "Succulent—use cactus mix", "Needs strong light" }
+                },
+                new Plant {
+                    CommonName = "Rubber Plant",
+                    LatinName = "Ficus elastica",
+                    LightNeeds = "Bright Indirect",
+                    WaterSchedule = "Every 1–2 weeks; allow top soil to dry",
+                    CareTips = { "Wipe leaves to reduce dust", "Can grow into a tree" }
+                },
+                new Plant {
+                    CommonName = "Fiddle Leaf Fig",
+                    LatinName = "Ficus lyrata",
+                    LightNeeds = "Bright Indirect",
+                    WaterSchedule = "Weekly; consistent schedule",
+                    CareTips = { "Hates cold drafts", "Rotate for even growth" }
+                },
+                new Plant {
+                    CommonName = "Chinese Evergreen",
+                    LatinName = "Aglaonema commutatum",
+                    LightNeeds = "Low–Medium Indirect",
+                    WaterSchedule = "Every 1–2 weeks; keep lightly moist",
+                    CareTips = { "Tolerant of low light", "Avoid soggy soil" }
+                }
+            };
+
+            // int added shows us how many new plants have been added to our plant library
+			int added = 0;
+			
+			// Loop through the plants and add them to the system
+            foreach (var p in seed)
+            {
+                // This is to protect the dictionary from duplicates
+				if (!_plants.ContainsKey(p.CommonName))
+                {
+                    _plants[p.CommonName] = p; //If theres no duplicate we add it
+                    added++;
+                }
+            }
+
+            // This shows us how many new plants have been added and how many total are in the dictionary
+			Console.WriteLine($"\nPopulated library with {added} plant(s). Total in library: {_plants.Count}.");
+        }
+
+      
+        // b) Display Dictionary Contents (3 methods)
+  
+        private static void DisplayLibraryMenu()
+        {
+            if (_plants.Count == 0)
+			// If the user has not populated the plants by pressing "a" first or no plants have been added this message appears 
+			// Tells the user to press "q" to exit back to main menu
+            {
+                Console.WriteLine("The library is empty. Choose 'a' to populate or 'd' to add a plant.");
+                return;
+            }
+
+            // This is the dictionary enumeration technique
+			// This asks the user which way they want the information displayed
+			
+			Console.WriteLine("\nChoose an enumeration method:");
+            Console.WriteLine("1) foreach over KeyValuePair<string, Plant>");
+            Console.WriteLine("2) foreach over Keys, then index into dictionary");
+            Console.WriteLine("3) foreach over Values");
+            Console.Write("Method (1/2/3): ");
+			
+			// Reads and tims user's input
+            var method = Console.ReadLine()?.Trim();
+
+            // Adding a line
+			Console.WriteLine();
+           
+			switch (method)
+            {
+				
+			// Method 1: foreach (var kvp in dictionary)
+			// This loops through each entry in the dictionary
+           	// as a KeyValuePair<TKey, TValue> object.
+            // kvp.Key   = the plant's common name (string)
+          	// kvp.Value = the Plant object stored as the value
+                case "1":
+					
+                    foreach (var kvp in _plants)
+                    {
+                        Console.WriteLine($"KEY: {kvp.Key}");
+                        Console.WriteLine(kvp.Value);
+                        Console.WriteLine(new string('-', 40));
+                    }
+                    break;
+
+              
+					// Method 2: loops though "Keys" then uses information to get into dictionary to get Value
+					
+				case "2":
+                   
+                    foreach (var key in _plants.Keys)
+                    {
+                        Plant p = _plants[key];
+                        Console.WriteLine($"KEY: {key}");
+                        Console.WriteLine(p);
+                        Console.WriteLine(new string('-', 40));
+                    }
+                    break;
+
+					
+               		// Method three shows CommonName inside value
+					// Instead of using keys from the dictionary we rely on the plant object to display information
+					// This demonstrates enumeration using Values only.
+				case "3":
+               
+                    foreach (var plant in _plants.Values)
+                    {
+                        Console.WriteLine($"KEY (from value): {plant.CommonName}");
+                        Console.WriteLine(plant);
+                        Console.WriteLine(new string('-', 40));
+                    }
+                    break;
+
+                // This message will appear if user puts in invalid data
+				default:
+                    Console.WriteLine("Invalid choice. Please choose 1, 2, or 3.");
+                    break;
+            }
+        }
+
+     
+        // c) Remove a Key
+		// RemovePlantByKey() Method
+		
+  
+        private static void RemovePlantByKey()
+        {
+            // If the dictionary is empty and there is nothing to display we let user know
+			if (_plants.Count == 0)
+            {
+                Console.WriteLine("The library is empty. Nothing to remove.");
+                return;
+            }
+
+            // We ask the user to enter the key, which is the plants common name
+			Console.Write("Enter the plant's common name to remove: ");
+            var key = Console.ReadLine()?.Trim();
+
+            // Validate the users input
+			if (string.IsNullOrWhiteSpace(key))
+            {
+                // if no ket words are entered
+				Console.WriteLine("No key provided.");
+                return;
+            }
+
+            // Attempt to remove the plant using Dictionary.Remove(key).
+			// The Remove() method checks whether the specified key exists in the dictionary.
+			//   - If the key IS found, Remove() deletes the key/value pair and returns true.
+			//   - If the key is NOT found, no deletion happens and Remove() returns false.
+			if (_plants.Remove(key))
+            {
+                // If Remove() is True, the plant (key) was present and has now been deleted and this message will appear
+				Console.WriteLine($"Removed \"{key}\" from the library.");
+            }
+            else
+            {
+                // If Remove() is False because the plant name couldnt be found, this message will appear
+				Console.WriteLine($"Plant \"{key}\" not found.");
+            }
+        }
+
+        
+        // d) Add a New "Key" Plant name && "Value" Plant information
+      
+        private static void AddNewPlant()
+        {
+            // Ask user for the "key" the plants common name
+			Console.Write("Common name (key): ");
+            var common = ReadNonEmpty();
+
+            // ContainsKey() returns true if the key is already stored in the dictionary
+			if (_plants.ContainsKey(common))
+            {
+                // If the entered key already exists, this message is given to the user
+				Console.WriteLine("That plant already exists. Use option 'e' to add a care tip or update fields with the updater below.");
+                // Asked the user if it wants to change information on an existing plant instead of trying to make a duplicate
+				if (Confirm("Would you like to update light or water schedule now? (y/n): "))
+                {
+                    UpdateExistingPlant(common);
+                }
+                // duplicates are not allowed so exit methos
+				return;
+            }
+
+            // if the user wants to enter information on plant
+			Console.Write("Latin name: ");
+            var latin = ReadNonEmpty();
+
+            Console.Write("Light needs (e.g., Low–Medium Indirect): ");
+            var light = ReadNonEmpty();
+
+            Console.Write("Water schedule (e.g., \"Every 1–2 weeks; allow top 1–2\\\" to dry\"): ");
+            var water = ReadNonEmpty();
+
+            // Create a new Plant object and assign the collected values.
+			// This object will serve as the dictionary VALUE.
+			var plant = new Plant
+            {
+                CommonName = common,
+                LatinName = latin,
+                LightNeeds = light,
+                WaterSchedule = water
+            };
+
+            // User asked if they want to add additional care tips
+			// Care tips are stored inside a List<string> within the Plant object.
+			if (Confirm("Add an initial care tip? (y/n): "))
+            {
+                // if text is entered add it to plant care
+				Console.Write("Care tip: ");
+                var tip = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(tip)) plant.CareTips.Add(tip.Trim());
+            }
+
+            // Add new plant to the dictionary using the common name as the key
+			_plants[common] = plant;
+            Console.WriteLine($"Added \"{common}\" to the library.");
+        }
+
+        
+        // e) Add a Value to an Existing Key (append a Care Tip)
+        // AppendValueToExistingKey() method
+		// Adding information on an existing plant
+		
+        private static void AppendValueToExistingKey()
+        {
+            // If library is empty we tell user they have to fix that first
+			if (_plants.Count == 0)
+            {
+                Console.WriteLine("The library is empty. Add or populate plants first.");
+                return;
+            }
+
+            // Ask the user which "key" plant name they want to add information to
+			Console.Write("Enter the plant's common name: ");
+            var key = ReadNonEmpty();
+
+            // TryGetValue attempts to retrieve the value associated with the key.
+			if (!_plants.TryGetValue(key, out var plant))
+            {
+                Console.WriteLine($"Plant \"{key}\" not found.");
+                return;
+            }
+
+            // Displays which key or plant name is being edited
+			Console.WriteLine($"Selected: {plant.CommonName}");
+			
+			// Presents user with multiple update options
+            Console.WriteLine("What would you like to add?");
+            Console.WriteLine("1) Add a Care Tip (append a new string value)");
+            Console.WriteLine("2) Update Water Schedule");
+            Console.WriteLine("3) Update Light Needs");
+            Console.Write("Choice (1/2/3): ");
+            var c = Console.ReadLine()?.Trim();
+
+            switch (c)
+            {
+                // Add new care tip
+				case "1":
+                    Console.Write("Enter new care tip: ");
+                    var tip = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(tip))
+                    {
+                        plant.CareTips.Add(tip.Trim());
+                        Console.WriteLine("Care tip added.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("No care tip provided.");
+                    }
+                    break;
+
+                // Add new water schedule tip
+				case "2":
+                    Console.Write("Enter new water schedule: ");
+                    var ws = ReadNonEmpty();
+                    plant.WaterSchedule = ws;
+                    Console.WriteLine("Water schedule updated.");
+                    break;
+
+                // Update light requirments
+				case "3":
+                    Console.Write("Enter new light needs: ");
+                    var ln = ReadNonEmpty();
+                    plant.LightNeeds = ln;
+                    Console.WriteLine("Light needs updated.");
+                    break;
+
+                // if user enters invalid date
+				default:
+                    Console.WriteLine("Invalid choice.");
+                    break;
+            }
+        }
+
+       
+        // f) Sort and siplay the "keys" the plants common names for user
+
+        private static void SortAndDisplayKeys()
+        {
+            if (_plants.Count == 0)
+            {
+                // Tells the user there is nothing to display
+				Console.WriteLine("The library is empty.");
+                return;
+            }
+
+            // We sort the keys alphabetically using using LINQ's OrderBy()
+			Console.WriteLine("\nSorted plant keys (A→Z):");
+            foreach (var key in _plants.Keys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase))
+            {
+				// Displays the plants names, the "keys"
+				Console.WriteLine($"- {key}");
+            }
+        }
+
+        
+        // Helpers
+        
+        private static string ReadNonEmpty()
+        {
+           // This makes the system loop until user enters a valid answer
+			while (true)
+            {
+                var s = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(s)) return s.Trim();
+                Console.Write("Please enter a value: ");
+            }
+        }
+
+        private static bool Confirm(string prompt)
+        {
+            // Prompt asked user a yes or no question
+			Console.Write(prompt);
+            // takes user input and makes it lowercase to be read by program
+			var ans = Console.ReadLine()?.Trim().ToLowerInvariant();
+            // "yes" or "y" will make the method "true"
+			return ans == "y" || ans == "yes";
+        }
+
+// Updates an existing plant’s light and water schedule
+public void UpdatePlant(string common)
+{
+    // Check if the plant exists
+    if (!_plants.TryGetValue(common, out var plant))
+    {
+        Console.WriteLine("Plant not found.");
+        return;
+    }
+
+    // Update light needs
+    Console.Write($"Current light: {plant.LightNeeds}. Enter new light (or leave blank to keep): ");
+    var newLight = Console.ReadLine();
+
+    if (!string.IsNullOrWhiteSpace(newLight))
+        plant.LightNeeds = newLight.Trim();
+
+    // Update water schedule
+    Console.Write($"Current water: {plant.WaterSchedule}. Enter new water schedule (or leave blank to keep): ");
+    var newWater = Console.ReadLine();
+
+    if (!string.IsNullOrWhiteSpace(newWater))
+        plant.WaterSchedule = newWater.Trim();
+
+    // Show updated plant
+    Console.WriteLine("Updated plant:");
+    Console.WriteLine(plant);
+}
+	}
+}
+
+	
+		
