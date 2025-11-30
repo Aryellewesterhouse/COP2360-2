@@ -1,0 +1,121 @@
+using System;
+// hold the lists
+using System.Collections.Generic;
+
+// stores info like name, number and start date 
+public class Contractor
+{
+    public string ContractorName { get; set; }
+    public string ContractorNumber { get; set; }
+    public string StartDate { get; set; }
+
+    // Uses automatic properties
+    public Contractor()
+    {
+        ContractorName = "";
+        ContractorNumber = "";
+        StartDate = "";
+    }
+
+    public Contractor(string name, string number, string date)
+    {
+        ContractorName = name;
+        ContractorNumber = number;
+        StartDate = date;
+    }
+}
+
+// This is the parent class for Subcontractor.
+// add the fields day shift and night shift
+public class Subcontractor : Contractor
+{
+    public int Shift { get; set; }
+    public double HourlyRate { get; set; }
+
+    public Subcontractor() : base()
+    {
+        Shift = 1;
+        HourlyRate = 0.0;
+    }
+
+    public Subcontractor(string name, string number, string date, int shift, double rate)
+        : base(name, number, date)
+    {
+        Shift = shift;
+        HourlyRate = rate;
+    }
+
+    // pay calculation method
+    public float ComputePay(float hoursWorked)
+    {
+        double pay = HourlyRate * hoursWorked;
+
+        if (Shift == 2)
+        {
+            pay += pay * 0.03;  // 3% differential
+        }
+
+        return (float)pay;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        // list to store all subcontractors
+        List<Subcontractor> subs = new List<Subcontractor>();
+        char another = 'y';
+
+        // User Input Loop
+        while (char.ToLower(another) == 'y')
+        {
+            Console.Write("\nEnter Subcontractor Name: ");
+            string name = Console.ReadLine();
+
+            Console.Write("Enter Contractor Number: ");
+            string number = Console.ReadLine();
+
+            Console.Write("Enter Start Date (MM/DD/YYYY): ");
+            string date = Console.ReadLine();
+
+            Console.Write("Enter Shift (1 = Day, 2 = Night): ");
+            int shift = int.Parse(Console.ReadLine());
+
+            Console.Write("Enter Hourly Pay Rate: ");
+            double rate = double.Parse(Console.ReadLine());
+
+            // Adding a Subcontractor
+            subs.Add(new Subcontractor(name, number, date, shift, rate));
+
+            // asks to add more (FIXED VERSION)
+            Console.Write("Add another subcontractor? (y/n): ");
+            string input = Console.ReadLine().ToLower();
+
+            if (!string.IsNullOrEmpty(input))
+            {
+                another = input[0];
+            }
+            else
+            {
+                another = 'n';
+            }
+        }
+
+        // Summary Output
+        Console.WriteLine("\n======= Subcontractor Summary =======");
+        foreach (var sub in subs)
+        {
+            Console.WriteLine("\nName: " + sub.ContractorName);
+            Console.WriteLine("Contractor Number: " + sub.ContractorNumber);
+            Console.WriteLine("Start Date: " + sub.StartDate);
+            Console.WriteLine("Shift: " + (sub.Shift == 1 ? "Day" : "Night"));
+            Console.WriteLine("Hourly Rate: $" + sub.HourlyRate);
+            Console.WriteLine("Computed Pay for 40 hours: $" + sub.ComputePay(40));
+        }
+
+        // End program
+        Console.WriteLine("\nPress ENTER to exit.");
+        Console.ReadLine();
+    }
+}
